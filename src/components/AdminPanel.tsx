@@ -380,22 +380,30 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
   const handleUpdateUser = async () => {
     try {
+      const cleanData = (data: any) => {
+        const { password, confirmPassword, ...rest } = data;
+        if (password && password.trim() !== '') {
+          return { ...rest, password };
+        }
+        return rest;
+      };
+
       if (editingType === 'individual') {
         await usersAPI.update(editingId!, {
-          ...individualForm,
+          ...cleanData(individualForm),
           role: 'individual'
         });
         alert('✅ Usuario actualizado exitosamente');
       } else if (editingType === 'company') {
         await usersAPI.update(editingId!, {
-          ...companyForm,
+          ...cleanData(companyForm),
           name: companyForm.companyName,
           role: 'company'
         });
         alert('✅ Empresa actualizada exitosamente');
       } else if (editingType === 'worker') {
         await usersAPI.update(editingId!, {
-          ...workerForm,
+          ...cleanData(workerForm),
           role: 'worker'
         });
         alert('✅ Trabajador actualizado exitosamente');
@@ -405,6 +413,19 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
       loadData();
     } catch (error: any) {
       alert('Error: ' + (error.message || 'No se pudo actualizar el usuario'));
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, type: string) => {
+    if (confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.')) {
+      try {
+        await usersAPI.delete(userId);
+        alert('✅ Usuario eliminado exitosamente');
+        loadData();
+      } catch (error: any) {
+        console.error('Error deleting user:', error);
+        alert('Error: ' + (error.message || 'No se pudo eliminar el usuario'));
+      }
     }
   };
 
@@ -442,16 +463,16 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 pb-20">
+      <div className="bg-[#0a0a2e] p-6 pb-20 shadow-md">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-white mb-1">Panel Administrador</h1>
-              <p className="text-white/80">Bienvenido, {user.name}</p>
+              <h1 className="text-white mb-1 font-bold text-2xl">Panel Administrador</h1>
+              <p className="text-gray-300">Bienvenido, {user.name}</p>
             </div>
             <button
               onClick={onLogout}
-              className="px-6 py-2 bg-white/20 backdrop-blur-sm rounded-[16px] text-white hover:bg-white/30 transition-all"
+              className="px-6 py-2 bg-white/10 backdrop-blur-sm rounded-[16px] text-white hover:bg-white/20 transition-all border border-white/20"
             >
               Salir
             </button>
@@ -461,12 +482,12 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto -mt-12 px-6">
-        <div className="bg-white rounded-[24px] shadow-lg p-2 flex gap-2 mb-6 flex-wrap">
+        <div className="bg-white rounded-[24px] shadow-xl p-2 flex gap-2 mb-6 flex-wrap border border-gray-100">
           <button
             onClick={() => setActiveTab('users')}
-            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 ${activeTab === 'users'
-                ? 'bg-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-50'
+            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 font-medium ${activeTab === 'users'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
               }`}
           >
             <Users className="w-5 h-5" />
@@ -474,9 +495,9 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
           </button>
           <button
             onClick={() => setActiveTab('courses')}
-            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 ${activeTab === 'courses'
-                ? 'bg-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-50'
+            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 font-medium ${activeTab === 'courses'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
               }`}
           >
             <BookOpen className="w-5 h-5" />
@@ -484,9 +505,9 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
           </button>
           <button
             onClick={() => setActiveTab('packages')}
-            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 ${activeTab === 'packages'
-                ? 'bg-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-50'
+            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 font-medium ${activeTab === 'packages'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
               }`}
           >
             <Package className="w-5 h-5" />
@@ -494,18 +515,18 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
           </button>
           <button
             onClick={() => setActiveTab('ranking')}
-            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 ${activeTab === 'ranking'
-                ? 'bg-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-50'
+            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 font-medium ${activeTab === 'ranking'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
               }`}
           >
             🏆 Ranking
           </button>
           <button
             onClick={() => setActiveTab('management')}
-            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 ${activeTab === 'management'
-                ? 'bg-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-50'
+            className={`flex-1 min-w-[120px] py-3 rounded-[16px] transition-all flex items-center justify-center gap-2 font-medium ${activeTab === 'management'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
               }`}
           >
             <BarChart3 className="w-5 h-5" />
@@ -520,8 +541,8 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
           {/* GESTIÓN Y PROGRESO */}
           {activeTab === 'management' && (
             <div>
-              <h2 className="text-gray-900 mb-6 flex items-center gap-2">
-                <BarChart3 className="w-6 h-6 text-indigo-600" />
+              <h2 className="text-gray-900 mb-6 flex items-center gap-2 font-bold text-xl">
+                <BarChart3 className="w-6 h-6 text-blue-600" />
                 Gestión y Progreso
               </h2>
 
@@ -532,12 +553,12 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                     setSelectedCompany(null);
                     loadIndividualsProgress();
                   }}
-                  className={`px-4 py-2 rounded-[16px] transition-all whitespace-nowrap ${!selectedCompany
-                      ? 'bg-purple-600 text-white shadow-lg'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  className={`px-4 py-2 rounded-[16px] transition-all whitespace-nowrap font-medium ${!selectedCompany
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                     }`}
                 >
-                  💜 Usuarios Individuales
+                  👤 Usuarios Individuales
                 </button>
                 {companies.map((company) => (
                   <button
@@ -546,12 +567,12 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                       setSelectedCompany(company);
                       loadCompanyWorkers(company.id);
                     }}
-                    className={`px-4 py-2 rounded-[16px] transition-all whitespace-nowrap ${selectedCompany?.id === company.id
-                        ? 'bg-green-600 text-white shadow-lg'
-                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    className={`px-4 py-2 rounded-[16px] transition-all whitespace-nowrap font-medium ${selectedCompany?.id === company.id
+                      ? 'bg-[#0a0a2e] text-white shadow-lg shadow-blue-900/30'
+                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                       }`}
                   >
-                    💚 {company.name || company.companyName} {company.userCode && `(${company.userCode})`}
+                    🏢 {company.name || company.companyName} {company.userCode && `(${company.userCode})`}
                   </button>
                 ))}
               </div>
@@ -670,27 +691,27 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
                     {/* Estadísticas generales de la empresa */}
                     <div className="grid grid-cols-4 gap-4 mb-6">
-                      <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-[16px] p-4 text-center">
-                        <div className="text-2xl text-green-600 mb-1">{companyWorkers.length}</div>
-                        <div className="text-sm text-gray-600">Trabajadores</div>
+                      <div className="bg-white rounded-[16px] p-4 text-center border-2 border-green-100 shadow-sm">
+                        <div className="text-2xl text-green-600 mb-1 font-bold">{companyWorkers.length}</div>
+                        <div className="text-sm text-gray-500">Trabajadores</div>
                       </div>
-                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-[16px] p-4 text-center">
-                        <div className="text-2xl text-blue-600 mb-1">
+                      <div className="bg-white rounded-[16px] p-4 text-center border-2 border-blue-100 shadow-sm">
+                        <div className="text-2xl text-blue-600 mb-1 font-bold">
                           {companyWorkers.reduce((sum, w) => sum + (w.enrolledCourses || 0), 0)}
                         </div>
-                        <div className="text-sm text-gray-600">Total Inscritos</div>
+                        <div className="text-sm text-gray-500">Total Inscritos</div>
                       </div>
-                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-[16px] p-4 text-center">
-                        <div className="text-2xl text-purple-600 mb-1">
+                      <div className="bg-white rounded-[16px] p-4 text-center border-2 border-purple-100 shadow-sm">
+                        <div className="text-2xl text-purple-600 mb-1 font-bold">
                           {companyWorkers.reduce((sum, w) => sum + (w.completedCourses || 0), 0)}
                         </div>
-                        <div className="text-sm text-gray-600">Total Completados</div>
+                        <div className="text-sm text-gray-500">Total Completados</div>
                       </div>
-                      <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-[16px] p-4 text-center">
-                        <div className="text-2xl text-yellow-600 mb-1">
+                      <div className="bg-white rounded-[16px] p-4 text-center border-2 border-yellow-100 shadow-sm">
+                        <div className="text-2xl text-yellow-600 mb-1 font-bold">
                           {companyWorkers.reduce((sum, w) => sum + (w.points || 0), 0)}
                         </div>
-                        <div className="text-sm text-gray-600">Total Puntos</div>
+                        <div className="text-sm text-gray-500">Total Puntos</div>
                       </div>
                     </div>
 
@@ -752,13 +773,324 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                 {!editingId && (
                   <button
                     onClick={() => setIsCreating(!isCreating)}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-[16px] hover:shadow-lg transition-all flex items-center gap-2"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all flex items-center gap-2 font-bold"
                   >
                     <Plus className="w-5 h-5" />
                     Crear Usuario
                   </button>
                 )}
               </div>
+
+              {/* Modal de Creación */}
+              {isCreating && (
+                <div className="bg-white rounded-[24px] p-6 shadow-lg mb-6 border-2 border-blue-200">
+                  <h3 className="text-gray-900 mb-4 flex items-center gap-2 font-bold">
+                    <Plus className="w-5 h-5 text-blue-600" />
+                    Crear Nuevo Usuario
+                  </h3>
+
+                  {/* Selector de Tipo de Usuario */}
+                  <div className="flex gap-2 mb-6">
+                    <button
+                      onClick={() => setUserCreationType('individual')}
+                      className={`flex-1 py-2 rounded-[12px] text-sm font-medium transition-all ${userCreationType === 'individual'
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                      Individual
+                    </button>
+                    <button
+                      onClick={() => setUserCreationType('company')}
+                      className={`flex-1 py-2 rounded-[12px] text-sm font-medium transition-all ${userCreationType === 'company'
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                      Empresa
+                    </button>
+                    <button
+                      onClick={() => setUserCreationType('worker')}
+                      className={`flex-1 py-2 rounded-[12px] text-sm font-medium transition-all ${userCreationType === 'worker'
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                      Trabajador
+                    </button>
+                  </div>
+
+                  {/* Formulario Individual */}
+                  {userCreationType === 'individual' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-gray-700 mb-2">Nombre Completo *</label>
+                        <input
+                          type="text"
+                          value={individualForm.name}
+                          onChange={(e) => setIndividualForm({ ...individualForm, name: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Correo Electrónico *</label>
+                        <input
+                          type="email"
+                          value={individualForm.email}
+                          onChange={(e) => setIndividualForm({ ...individualForm, email: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-gray-700 mb-2">Contraseña *</label>
+                          <input
+                            type="password"
+                            value={individualForm.password}
+                            onChange={(e) => setIndividualForm({ ...individualForm, password: e.target.value })}
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-2">Confirmar Contraseña *</label>
+                          <input
+                            type="password"
+                            value={individualForm.confirmPassword}
+                            onChange={(e) => setIndividualForm({ ...individualForm, confirmPassword: e.target.value })}
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-gray-700 mb-2">Tipo de Documento</label>
+                          <select
+                            value={individualForm.documentType}
+                            onChange={(e) => setIndividualForm({ ...individualForm, documentType: e.target.value })}
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none bg-white"
+                          >
+                            <option value="CC">Cédula de Ciudadanía</option>
+                            <option value="TI">Tarjeta de Identidad</option>
+                            <option value="CE">Cédula de Extranjería</option>
+                            <option value="PAS">Pasaporte</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-2">Número de Documento</label>
+                          <input
+                            type="text"
+                            value={individualForm.documentNumber}
+                            onChange={(e) => setIndividualForm({ ...individualForm, documentNumber: e.target.value })}
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Paquete</label>
+                        <select
+                          value={individualForm.packageId}
+                          onChange={(e) => setIndividualForm({ ...individualForm, packageId: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-blue-600 focus:outline-none bg-white"
+                        >
+                          <option value="">Seleccionar paquete...</option>
+                          {packages.map((pkg) => (
+                            <option key={pkg.id} value={pkg.id}>
+                              {pkg.name} - ${pkg.price}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex gap-3 pt-4">
+                        <button
+                          onClick={handleCreateIndividual}
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
+                        >
+                          Crear Individual
+                        </button>
+                        <button
+                          onClick={() => setIsCreating(false)}
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Formulario Empresa */}
+                  {userCreationType === 'company' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-gray-700 mb-2">NIT *</label>
+                        <input
+                          type="text"
+                          value={companyForm.nit}
+                          onChange={(e) => setCompanyForm({ ...companyForm, nit: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Nombre de la Empresa *</label>
+                        <input
+                          type="text"
+                          value={companyForm.companyName}
+                          onChange={(e) => setCompanyForm({ ...companyForm, companyName: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Correo Electrónico *</label>
+                        <input
+                          type="email"
+                          value={companyForm.email}
+                          onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-gray-700 mb-2">Contraseña *</label>
+                          <input
+                            type="password"
+                            value={companyForm.password}
+                            onChange={(e) => setCompanyForm({ ...companyForm, password: e.target.value })}
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-2">Confirmar Contraseña *</label>
+                          <input
+                            type="password"
+                            value={companyForm.confirmPassword}
+                            onChange={(e) => setCompanyForm({ ...companyForm, confirmPassword: e.target.value })}
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Cantidad de Trabajadores</label>
+                        <input
+                          type="number"
+                          value={companyForm.workerLimit}
+                          onChange={(e) => setCompanyForm({ ...companyForm, workerLimit: parseInt(e.target.value) })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          min="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Paquete</label>
+                        <select
+                          value={companyForm.packageId}
+                          onChange={(e) => setCompanyForm({ ...companyForm, packageId: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-blue-600 focus:outline-none bg-white"
+                        >
+                          <option value="">Seleccionar paquete...</option>
+                          {packages.map((pkg) => (
+                            <option key={pkg.id} value={pkg.id}>
+                              {pkg.name} - ${pkg.price}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex gap-3 pt-4">
+                        <button
+                          onClick={handleCreateCompany}
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
+                        >
+                          Crear Empresa
+                        </button>
+                        <button
+                          onClick={() => setIsCreating(false)}
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Formulario Trabajador */}
+                  {userCreationType === 'worker' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-gray-700 mb-2">Nombre Completo *</label>
+                        <input
+                          type="text"
+                          value={workerForm.name}
+                          onChange={(e) => setWorkerForm({ ...workerForm, name: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Cédula *</label>
+                        <input
+                          type="text"
+                          value={workerForm.documentNumber}
+                          onChange={(e) => setWorkerForm({ ...workerForm, documentNumber: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Correo Electrónico *</label>
+                        <input
+                          type="email"
+                          value={workerForm.email}
+                          onChange={(e) => setWorkerForm({ ...workerForm, email: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Teléfono *</label>
+                        <input
+                          type="tel"
+                          value={workerForm.phone}
+                          onChange={(e) => setWorkerForm({ ...workerForm, phone: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Empresa *</label>
+                        <select
+                          value={workerForm.companyId}
+                          onChange={(e) => setWorkerForm({ ...workerForm, companyId: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-blue-600 focus:outline-none bg-white"
+                        >
+                          <option value="">Seleccionar empresa...</option>
+                          {companies.map((company) => (
+                            <option key={company.id} value={company.id}>
+                              {company.name} - NIT: {company.nit}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-2">Contraseña (Opcional)</label>
+                        <input
+                          type="password"
+                          value={workerForm.password}
+                          onChange={(e) => setWorkerForm({ ...workerForm, password: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          placeholder="Dejar en blanco para autogenerar"
+                        />
+                      </div>
+                      <div className="flex gap-3 pt-4">
+                        <button
+                          onClick={handleCreateWorker}
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
+                        >
+                          Crear Trabajador
+                        </button>
+                        <button
+                          onClick={() => setIsCreating(false)}
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Modal de Edición */}
               {editingId && (
@@ -776,7 +1108,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="text"
                           value={individualForm.name}
                           onChange={(e) => setIndividualForm({ ...individualForm, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         />
                       </div>
 
@@ -786,7 +1118,18 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="email"
                           value={individualForm.email}
                           onChange={(e) => setIndividualForm({ ...individualForm, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">Nueva Contraseña (Opcional)</label>
+                        <input
+                          type="password"
+                          value={individualForm.password}
+                          onChange={(e) => setIndividualForm({ ...individualForm, password: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          placeholder="Dejar en blanco para mantener la actual"
                         />
                       </div>
 
@@ -796,7 +1139,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           <select
                             value={individualForm.documentType}
                             onChange={(e) => setIndividualForm({ ...individualForm, documentType: e.target.value })}
-                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none bg-white"
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none bg-white"
                           >
                             <option value="CC">Cédula de Ciudadanía</option>
                             <option value="TI">Tarjeta de Identidad</option>
@@ -810,7 +1153,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                             type="text"
                             value={individualForm.documentNumber}
                             onChange={(e) => setIndividualForm({ ...individualForm, documentNumber: e.target.value })}
-                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                            className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                           />
                         </div>
                       </div>
@@ -820,7 +1163,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                         <select
                           value={individualForm.packageId}
                           onChange={(e) => setIndividualForm({ ...individualForm, packageId: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-indigo-600 focus:outline-none bg-white"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-blue-600 focus:outline-none bg-white"
                         >
                           <option value="">Seleccionar paquete...</option>
                           {packages.map((pkg) => (
@@ -834,13 +1177,13 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                       <div className="flex gap-3 pt-4">
                         <button
                           onClick={handleUpdateUser}
-                          className="flex-1 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-[16px] hover:shadow-lg transition-all"
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
                         >
                           Guardar Cambios
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all"
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
                         >
                           Cancelar
                         </button>
@@ -856,7 +1199,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="text"
                           value={companyForm.nit}
                           onChange={(e) => setCompanyForm({ ...companyForm, nit: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         />
                       </div>
 
@@ -866,7 +1209,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="text"
                           value={companyForm.companyName}
                           onChange={(e) => setCompanyForm({ ...companyForm, companyName: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         />
                       </div>
 
@@ -876,7 +1219,18 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="email"
                           value={companyForm.email}
                           onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">Nueva Contraseña (Opcional)</label>
+                        <input
+                          type="password"
+                          value={companyForm.password}
+                          onChange={(e) => setCompanyForm({ ...companyForm, password: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          placeholder="Dejar en blanco para mantener la actual"
                         />
                       </div>
 
@@ -886,7 +1240,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="number"
                           value={companyForm.workerLimit}
                           onChange={(e) => setCompanyForm({ ...companyForm, workerLimit: parseInt(e.target.value) })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                           min="1"
                         />
                       </div>
@@ -896,7 +1250,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                         <select
                           value={companyForm.packageId}
                           onChange={(e) => setCompanyForm({ ...companyForm, packageId: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-indigo-600 focus:outline-none bg-white"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-blue-600 focus:outline-none bg-white"
                         >
                           <option value="">Seleccionar paquete...</option>
                           {packages.map((pkg) => (
@@ -910,13 +1264,13 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                       <div className="flex gap-3 pt-4">
                         <button
                           onClick={handleUpdateUser}
-                          className="flex-1 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-[16px] hover:shadow-lg transition-all"
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
                         >
                           Guardar Cambios
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all"
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
                         >
                           Cancelar
                         </button>
@@ -932,7 +1286,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="text"
                           value={workerForm.name}
                           onChange={(e) => setWorkerForm({ ...workerForm, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         />
                       </div>
 
@@ -942,7 +1296,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="text"
                           value={workerForm.documentNumber}
                           onChange={(e) => setWorkerForm({ ...workerForm, documentNumber: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         />
                       </div>
 
@@ -952,7 +1306,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="email"
                           value={workerForm.email}
                           onChange={(e) => setWorkerForm({ ...workerForm, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         />
                       </div>
 
@@ -962,7 +1316,18 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           type="tel"
                           value={workerForm.phone}
                           onChange={(e) => setWorkerForm({ ...workerForm, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">Nueva Contraseña (Opcional)</label>
+                        <input
+                          type="password"
+                          value={workerForm.password}
+                          onChange={(e) => setWorkerForm({ ...workerForm, password: e.target.value })}
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
+                          placeholder="Dejar en blanco para mantener la actual"
                         />
                       </div>
 
@@ -971,7 +1336,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                         <select
                           value={workerForm.companyId}
                           onChange={(e) => setWorkerForm({ ...workerForm, companyId: e.target.value })}
-                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-indigo-600 focus:outline-none bg-white"
+                          className="w-full px-4 py-3 rounded-[16px] border-2 border-indigo-600 focus:border-blue-600 focus:outline-none bg-white"
                         >
                           <option value="">Seleccionar empresa...</option>
                           {companies.map((company) => (
@@ -985,13 +1350,13 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                       <div className="flex gap-3 pt-4">
                         <button
                           onClick={handleUpdateUser}
-                          className="flex-1 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-[16px] hover:shadow-lg transition-all"
+                          className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
                         >
                           Guardar Cambios
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all"
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
                         >
                           Cancelar
                         </button>
@@ -1005,40 +1370,51 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
               <div className="space-y-6">
                 {/* Individuales */}
                 <div>
-                  <h3 className="text-gray-900 mb-3 flex items-center gap-2">
-                    💜 Usuarios Individuales ({individuals.length})
+                  <h3 className="text-gray-900 mb-3 flex items-center gap-2 font-bold">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    Usuarios Individuales ({individuals.length})
                   </h3>
                   <div className="grid gap-3">
                     {individuals.map((individual) => (
-                      <div key={individual.id} className="bg-white rounded-[20px] p-5 shadow-md border-2 border-purple-100">
+                      <div key={individual.id} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-100">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-gray-900">{individual.name}</h4>
+                              <h4 className="text-gray-900 font-medium">{individual.name}</h4>
                               {individual.userCode && (
-                                <span className="px-2 py-0.5 bg-purple-600 text-white rounded-[8px] text-xs font-mono">
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-[8px] text-xs font-mono">
                                   {individual.userCode}
                                 </span>
                               )}
                             </div>
-                            <p className="text-gray-600 mb-2">{individual.email}</p>
+                            <p className="text-gray-500 mb-2 text-sm">{individual.email}</p>
                             <div className="flex gap-2 flex-wrap">
-                              <span className="px-3 py-1 bg-purple-100 text-purple-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-purple-100 text-purple-600 border border-purple-200 rounded-[12px] text-xs">
                                 Individual
                               </span>
                               {individual.documentNumber && (
-                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-[12px] text-sm">
+                                <span className="px-3 py-1 bg-gray-100 text-gray-600 border border-gray-200 rounded-[12px] text-xs">
                                   Doc: {individual.documentNumber}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <button
-                            onClick={() => startEditUser(individual, 'individual')}
-                            className="p-2 hover:bg-purple-50 rounded-[12px] transition-all"
-                          >
-                            <Edit className="w-5 h-5 text-purple-600" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditUser(individual, 'individual')}
+                              className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-[12px] transition-all"
+                              title="Editar usuario"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(individual.id, 'individual')}
+                              className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-[12px] transition-all"
+                              title="Eliminar usuario"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1047,41 +1423,52 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
                 {/* Empresas */}
                 <div>
-                  <h3 className="text-gray-900 mb-3 flex items-center gap-2">
-                    💚 Empresas ({companies.length})
+                  <h3 className="text-gray-900 mb-3 flex items-center gap-2 font-bold">
+                    <Building2 className="w-5 h-5 text-blue-600" />
+                    Empresas ({companies.length})
                   </h3>
                   <div className="grid gap-3">
                     {companies.map((company) => (
-                      <div key={company.id} className="bg-white rounded-[20px] p-5 shadow-md border-2 border-green-100">
+                      <div key={company.id} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-100">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-gray-900">{company.name}</h4>
+                              <h4 className="text-gray-900 font-medium">{company.name}</h4>
                               {company.userCode && (
-                                <span className="px-2 py-0.5 bg-green-600 text-white rounded-[8px] text-xs font-mono">
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-[8px] text-xs font-mono">
                                   {company.userCode}
                                 </span>
                               )}
                             </div>
-                            <p className="text-gray-600 mb-2">{company.email}</p>
+                            <p className="text-gray-500 mb-2 text-sm">{company.email}</p>
                             <div className="flex gap-2 flex-wrap">
-                              <span className="px-3 py-1 bg-green-100 text-green-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-[12px] text-xs">
                                 Empresa
                               </span>
-                              <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-gray-100 text-gray-600 border border-gray-200 rounded-[12px] text-xs">
                                 NIT: {company.nit}
                               </span>
-                              <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-gray-100 text-gray-600 border border-gray-200 rounded-[12px] text-xs">
                                 Trabajadores: {company.workerLimit}
                               </span>
                             </div>
                           </div>
-                          <button
-                            onClick={() => startEditUser(company, 'company')}
-                            className="p-2 hover:bg-green-50 rounded-[12px] transition-all"
-                          >
-                            <Edit className="w-5 h-5 text-green-600" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditUser(company, 'company')}
+                              className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-[12px] transition-all"
+                              title="Editar empresa"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(company.id, 'company')}
+                              className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-[12px] transition-all"
+                              title="Eliminar empresa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1090,45 +1477,56 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
                 {/* Trabajadores */}
                 <div>
-                  <h3 className="text-gray-900 mb-3 flex items-center gap-2">
-                    💙 Trabajadores ({workers.length})
+                  <h3 className="text-gray-900 mb-3 flex items-center gap-2 font-bold">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    Trabajadores ({workers.length})
                   </h3>
                   <div className="grid gap-3">
                     {workers.map((worker) => (
-                      <div key={worker.id} className="bg-white rounded-[20px] p-5 shadow-md border-2 border-blue-100">
+                      <div key={worker.id} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-100">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-gray-900">{worker.name}</h4>
+                              <h4 className="text-gray-900 font-medium">{worker.name}</h4>
                               {worker.userCode && (
-                                <span className="px-2 py-0.5 bg-blue-600 text-white rounded-[8px] text-xs font-mono">
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-[8px] text-xs font-mono">
                                   {worker.userCode}
                                 </span>
                               )}
                             </div>
-                            <p className="text-gray-600 mb-2">{worker.email}</p>
+                            <p className="text-gray-500 mb-2 text-sm">{worker.email}</p>
                             <div className="flex gap-2 flex-wrap">
-                              <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-[12px] text-xs">
                                 Trabajador
                               </span>
                               {worker.documentNumber && (
-                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-[12px] text-sm">
+                                <span className="px-3 py-1 bg-gray-100 text-gray-600 border border-gray-200 rounded-[12px] text-xs">
                                   Cédula: {worker.documentNumber}
                                 </span>
                               )}
                               {worker.phone && (
-                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-[12px] text-sm">
+                                <span className="px-3 py-1 bg-gray-100 text-gray-600 border border-gray-200 rounded-[12px] text-xs">
                                   Tel: {worker.phone}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <button
-                            onClick={() => startEditUser(worker, 'worker')}
-                            className="p-2 hover:bg-blue-50 rounded-[12px] transition-all"
-                          >
-                            <Edit className="w-5 h-5 text-blue-600" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditUser(worker, 'worker')}
+                              className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-[12px] transition-all"
+                              title="Editar trabajador"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(worker.id, 'worker')}
+                              className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-[12px] transition-all"
+                              title="Eliminar trabajador"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1142,7 +1540,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
           {activeTab === 'courses' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-gray-900">Gestión de Cursos</h2>
+                <h2 className="text-gray-900 font-bold text-xl">Gestión de Cursos</h2>
                 <div className="flex gap-2">
                   {courses.length === 0 && (
                     <button
@@ -1157,7 +1555,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           }
                         }
                       }}
-                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-[16px] hover:shadow-lg transition-all flex items-center gap-2"
+                      className="px-6 py-3 bg-gray-800 text-white rounded-[16px] hover:bg-gray-900 hover:shadow-lg transition-all flex items-center gap-2 font-medium"
                     >
                       <Sparkles className="w-5 h-5" />
                       Generar Datos de Prueba
@@ -1166,7 +1564,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                   {!editingId && (
                     <button
                       onClick={() => setIsCreating(!isCreating)}
-                      className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-[16px] hover:shadow-lg transition-all flex items-center gap-2"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all flex items-center gap-2 font-bold"
                     >
                       <Plus className="w-5 h-5" />
                       Crear Curso
@@ -1177,16 +1575,16 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
               {/* Formulario de Creación/Edición de Curso */}
               {(isCreating || editingId) && (
-                <div className="bg-white rounded-[24px] p-6 shadow-lg mb-6 border-2 border-indigo-200">
-                  <h3 className="text-gray-900 mb-4 flex items-center gap-2">
+                <div className="bg-white rounded-[24px] p-6 shadow-lg mb-6 border-2 border-blue-100">
+                  <h3 className="text-gray-900 mb-4 flex items-center gap-2 font-bold">
                     {editingId ? (
                       <>
-                        <Edit className="w-5 h-5 text-orange-600" />
+                        <Edit className="w-5 h-5 text-blue-600" />
                         Editar Curso
                       </>
                     ) : (
                       <>
-                        <Plus className="w-5 h-5 text-indigo-600" />
+                        <Plus className="w-5 h-5 text-blue-600" />
                         Crear Nuevo Curso
                       </>
                     )}
@@ -1195,33 +1593,33 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                   <div className="space-y-4">
                     {/* Información básica del curso */}
                     <div>
-                      <label className="block text-gray-700 mb-2">Nombre del Curso *</label>
+                      <label className="block text-gray-700 mb-2 font-medium">Nombre del Curso *</label>
                       <input
                         type="text"
                         value={courseForm.name}
                         onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
-                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         placeholder="Ej: Introducción a React"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-gray-700 mb-2">Descripción *</label>
+                      <label className="block text-gray-700 mb-2 font-medium">Descripción *</label>
                       <textarea
                         value={courseForm.description}
                         onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         rows={3}
                         placeholder="Describe de qué trata el curso..."
                       />
                     </div>
 
                     <div>
-                      <label className="block text-gray-700 mb-2">Categoría *</label>
+                      <label className="block text-gray-700 mb-2 font-medium">Categoría *</label>
                       <select
                         value={courseForm.category}
                         onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
-                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none bg-white"
+                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none bg-white"
                       >
                         <option value="">Seleccionar categoría...</option>
                         <option value="Programación">Programación</option>
@@ -1236,12 +1634,12 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                     </div>
 
                     <div>
-                      <label className="block text-gray-700 mb-2">Miniatura del Curso (URL)</label>
+                      <label className="block text-gray-700 mb-2 font-medium">Miniatura del Curso (URL)</label>
                       <input
                         type="url"
                         value={courseForm.thumbnailUrl}
                         onChange={(e) => setCourseForm({ ...courseForm, thumbnailUrl: e.target.value })}
-                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                        className="w-full px-4 py-3 rounded-[16px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                         placeholder="https://ejemplo.com/imagen.jpg"
                       />
                       <p className="text-gray-500 text-sm mt-1">
@@ -1265,10 +1663,10 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                     {/* Módulos */}
                     <div className="border-t-2 border-gray-200 pt-4">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-gray-900">Módulos del Curso</h4>
+                        <h4 className="text-gray-900 font-medium">Módulos del Curso</h4>
                         <button
                           onClick={addModule}
-                          className="px-4 py-2 bg-indigo-100 text-indigo-600 rounded-[12px] hover:bg-indigo-200 transition-all flex items-center gap-2"
+                          className="px-4 py-2 bg-blue-50 text-blue-600 rounded-[12px] hover:bg-blue-100 transition-all flex items-center gap-2 font-medium"
                         >
                           <Plus className="w-4 h-4" />
                           Agregar Módulo
@@ -1285,7 +1683,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                           {courseForm.modules.map((module, moduleIndex) => (
                             <div key={module.id} className="bg-gray-50 rounded-[16px] p-4 border-2 border-gray-200">
                               <div className="flex items-center justify-between mb-3">
-                                <h5 className="text-gray-700">Módulo {moduleIndex + 1}</h5>
+                                <h5 className="text-gray-700 font-medium">Módulo {moduleIndex + 1}</h5>
                                 <button
                                   onClick={() => {
                                     const newModules = courseForm.modules.filter((_, i) => i !== moduleIndex);
@@ -1308,7 +1706,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                       newModules[moduleIndex].name = e.target.value;
                                       setCourseForm({ ...courseForm, modules: newModules });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[12px] border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                                    className="w-full px-3 py-2 rounded-[12px] border-2 border-gray-200 focus:border-blue-600 focus:outline-none"
                                     placeholder="Ej: Fundamentos de React"
                                   />
                                 </div>
@@ -1319,7 +1717,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                     <label className="text-gray-600 text-sm">Videos</label>
                                     <button
                                       onClick={() => addVideoToModule(moduleIndex)}
-                                      className="px-3 py-1 bg-purple-100 text-purple-600 rounded-[8px] hover:bg-purple-200 transition-all text-sm flex items-center gap-1"
+                                      className="px-3 py-1 bg-blue-50 text-blue-600 rounded-[8px] hover:bg-blue-100 transition-all text-sm flex items-center gap-1"
                                     >
                                       <Plus className="w-3 h-3" />
                                       Video
@@ -1357,7 +1755,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                                 newModules[moduleIndex].videos[videoIndex].title = e.target.value;
                                                 setCourseForm({ ...courseForm, modules: newModules });
                                               }}
-                                              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 focus:border-indigo-600 focus:outline-none text-sm"
+                                              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 focus:border-blue-600 focus:outline-none text-sm"
                                               placeholder="Título del video"
                                             />
                                             <input
@@ -1368,7 +1766,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                                 newModules[moduleIndex].videos[videoIndex].url = e.target.value;
                                                 setCourseForm({ ...courseForm, modules: newModules });
                                               }}
-                                              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 focus:border-indigo-600 focus:outline-none text-sm"
+                                              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 focus:border-blue-600 focus:outline-none text-sm"
                                               placeholder="URL del video (YouTube, Vimeo, etc.)"
                                             />
                                             <textarea
@@ -1378,7 +1776,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                                 newModules[moduleIndex].videos[videoIndex].description = e.target.value;
                                                 setCourseForm({ ...courseForm, modules: newModules });
                                               }}
-                                              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 focus:border-indigo-600 focus:outline-none text-sm"
+                                              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 focus:border-blue-600 focus:outline-none text-sm"
                                               rows={2}
                                               placeholder="Descripción del video"
                                             />
@@ -1414,7 +1812,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                             alert('Error: ' + error.message);
                           });
                         } : handleCreateCourse}
-                        className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-[16px] hover:shadow-lg transition-all"
+                        className="flex-1 py-3 bg-blue-600 text-white rounded-[16px] hover:bg-blue-700 hover:shadow-lg transition-all font-bold"
                       >
                         {editingId ? 'Guardar Cambios' : 'Crear Curso'}
                       </button>
@@ -1430,7 +1828,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                             modules: []
                           });
                         }}
-                        className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all"
+                        className="px-6 py-3 bg-gray-200 text-gray-700 rounded-[16px] hover:bg-gray-300 transition-all font-medium"
                       >
                         Cancelar
                       </button>
@@ -1441,7 +1839,7 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
 
               {/* Lista de Cursos */}
               <div className="space-y-4">
-                <h3 className="text-gray-900 mb-3 flex items-center gap-2">
+                <h3 className="text-gray-900 mb-3 flex items-center gap-2 font-bold">
                   📚 Cursos Creados ({courses.length})
                 </h3>
 
@@ -1454,19 +1852,19 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                 ) : (
                   <div className="grid gap-4">
                     {courses.map((course) => (
-                      <div key={course.id} className="bg-white rounded-[20px] p-6 shadow-md border-2 border-indigo-100">
+                      <div key={course.id} className="bg-[#0a0a2e] rounded-[20px] p-6 shadow-md border border-blue-900/50">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
-                            <h4 className="text-gray-900 mb-2">{course.name}</h4>
-                            <p className="text-gray-600 mb-3">{course.description}</p>
+                            <h4 className="text-white mb-2 font-bold text-lg">{course.name}</h4>
+                            <p className="text-gray-400 mb-3">{course.description}</p>
                             <div className="flex gap-2 flex-wrap">
-                              <span className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-blue-900/50 text-blue-200 border border-blue-800 rounded-[12px] text-sm">
                                 {course.category}
                               </span>
-                              <span className="px-3 py-1 bg-purple-100 text-purple-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-blue-900/50 text-gray-300 border border-blue-800 rounded-[12px] text-sm">
                                 {course.modules?.length || 0} módulos
                               </span>
-                              <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-[12px] text-sm">
+                              <span className="px-3 py-1 bg-blue-900/50 text-gray-300 border border-blue-800 rounded-[12px] text-sm">
                                 {course.modules?.reduce((total, mod) => total + (mod.videos?.length || 0), 0) || 0} videos
                               </span>
                             </div>
@@ -1483,9 +1881,9 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                   modules: course.modules || []
                                 });
                               }}
-                              className="p-2 hover:bg-orange-50 rounded-[12px] transition-all"
+                              className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] transition-all"
                             >
-                              <Edit className="w-5 h-5 text-orange-600" />
+                              <Edit className="w-5 h-5" />
                             </button>
                             <button
                               onClick={async () => {
@@ -1499,21 +1897,21 @@ export function AdminPanel({ user, onLogout }: { user: any; onLogout: () => void
                                   }
                                 }
                               }}
-                              className="p-2 hover:bg-red-50 rounded-[12px] transition-all"
+                              className="p-2 bg-red-600 hover:bg-red-500 text-white rounded-[12px] transition-all"
                             >
-                              <Trash2 className="w-5 h-5 text-red-600" />
+                              <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
                         </div>
 
                         {/* Vista previa de módulos */}
                         {course.modules && course.modules.length > 0 && (
-                          <div className="border-t border-gray-200 pt-4 mt-4">
-                            <p className="text-gray-600 text-sm mb-2">Módulos:</p>
+                          <div className="border-t border-blue-900/50 pt-4 mt-4">
+                            <p className="text-gray-400 text-sm mb-2">Módulos:</p>
                             <div className="space-y-2">
                               {course.modules.map((module, idx) => (
-                                <div key={idx} className="bg-gray-50 rounded-[12px] p-3">
-                                  <p className="text-gray-700 text-sm mb-1">{idx + 1}. {module.name}</p>
+                                <div key={idx} className="bg-blue-950/30 rounded-[12px] p-3 border border-blue-900/30">
+                                  <p className="text-gray-300 text-sm mb-1">{idx + 1}. {module.name}</p>
                                   <p className="text-gray-500 text-xs">
                                     {module.videos?.length || 0} video{module.videos?.length !== 1 ? 's' : ''}
                                   </p>

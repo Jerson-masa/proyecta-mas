@@ -17,7 +17,7 @@ export const getAuthToken = async () => {
 // Helper for API calls
 const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   const token = await getAuthToken();
-  
+
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -28,11 +28,11 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   });
 
   const data = await response.json();
-  
+
   if (!response.ok) {
     throw new Error(data.error || 'Error en la solicitud');
   }
-  
+
   return data;
 };
 
@@ -47,7 +47,14 @@ export const authAPI = {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${publicAnonKey}` },
       body: JSON.stringify({ email, password, name, role, companyId }),
     });
-    return response.json();
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'Error al registrar usuario');
+    }
+
+    return data;
   },
 
   signIn: async (email: string, password: string) => {
@@ -55,7 +62,7 @@ export const authAPI = {
       email,
       password,
     });
-    
+
     if (error) throw error;
     return data;
   },
@@ -92,6 +99,9 @@ export const usersAPI = {
   update: (id: string, data: any) => apiCall(`/users/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
+  }),
+  delete: (id: string) => apiCall(`/users/${id}`, {
+    method: 'DELETE',
   }),
 };
 
@@ -145,7 +155,7 @@ export const enrollmentsAPI = {
     body: JSON.stringify({ courseId }),
   }),
   getMyEnrollments: () => apiCall('/enrollments/my'),
-  updateProgress: (enrollmentId: string, progress: number, currentModule: number, completed: boolean) => 
+  updateProgress: (enrollmentId: string, progress: number, currentModule: number, completed: boolean) =>
     apiCall(`/enrollments/${enrollmentId}/progress`, {
       method: 'PUT',
       body: JSON.stringify({ progress, currentModule, completed }),
