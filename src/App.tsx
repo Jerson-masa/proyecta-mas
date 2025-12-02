@@ -54,8 +54,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" 
-           style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}>
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"></div>
       </div>
     );
@@ -63,7 +63,7 @@ export default function App() {
 
   // Vista pública - Feed sin login
   if (view === 'public') {
-    return <PublicFeed onLoginRequest={handleLoginRequest} />;
+    return <PublicFeed onLoginRequest={handleLoginRequest} onAuthSuccess={handleAuthSuccess} />;
   }
 
   // Pantalla de autenticación

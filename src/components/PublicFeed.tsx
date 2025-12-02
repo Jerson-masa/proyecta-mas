@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Home, BookOpen, User, Play, Lock, ChevronRight } from 'lucide-react';
 import { coursesAPI } from '../utils/api';
 import { ShortsPlayer } from './ShortsPlayer';
+import { AuthScreen } from './AuthScreen';
 
 interface PublicFeedProps {
   onLoginRequest: () => void;
+  onAuthSuccess: () => void;
 }
 
-export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
+export function PublicFeed({ onLoginRequest, onAuthSuccess }: PublicFeedProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'courses' | 'profile'>('home');
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
@@ -212,22 +214,8 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
   return (
     <div className="min-h-screen w-full">
       {activeTab === 'profile' ? (
-        <div className="flex items-center justify-center h-full bg-gradient-to-b from-indigo-500 to-purple-600">
-          <div className="text-center px-6">
-            <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md mx-auto mb-4 flex items-center justify-center">
-              <User className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-white mb-2">Inicia sesión</h2>
-            <p className="text-white/80 mb-6">
-              Accede a todo el contenido y guarda tu progreso
-            </p>
-            <button
-              onClick={onLoginRequest}
-              className="bg-white text-indigo-600 px-8 py-4 rounded-[24px] hover:shadow-xl transition-all"
-            >
-              Iniciar sesión
-            </button>
-          </div>
+        <div className="h-full overflow-y-auto bg-white">
+          <AuthScreen onAuthSuccess={onAuthSuccess} isEmbedded={true} />
         </div>
       ) : activeTab === 'courses' ? (
         // Vista de Cursos - Tarjetas con imágenes

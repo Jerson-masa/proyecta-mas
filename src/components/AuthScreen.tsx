@@ -5,9 +5,10 @@ import { Copy, User, Users, Briefcase, Shield, ArrowLeft } from 'lucide-react';
 interface AuthScreenProps {
   onAuthSuccess: () => void;
   onBack?: () => void;
+  isEmbedded?: boolean;
 }
 
-export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
+export function AuthScreen({ onAuthSuccess, onBack, isEmbedded = false }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -105,11 +106,11 @@ export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" 
-         style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}>
-      <div className="w-full max-w-md bg-white rounded-[32px] p-8 shadow-2xl">
+    <div className={`w-full ${isEmbedded ? 'h-full bg-white' : 'min-h-screen bg-white md:bg-gray-50 md:flex md:items-center md:justify-center md:p-4'}`}
+      style={!isEmbedded && window.innerWidth >= 768 ? { background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' } : {}}>
+      <div className={`w-full bg-white ${isEmbedded ? 'p-6 pb-24' : 'p-6 md:max-w-2xl md:mx-auto md:rounded-[32px] md:shadow-2xl md:p-8'}`}>
         {/* Botón de volver */}
-        {onBack && (
+        {onBack && !isEmbedded && (
           <button
             onClick={onBack}
             className="mb-4 text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-2"
@@ -118,7 +119,7 @@ export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
             Volver al feed
           </button>
         )}
-        
+
         <div className="text-center mb-8">
           <h1 className="text-gray-900 mb-2">Plataforma de Cursos</h1>
           <p className="text-gray-600">
@@ -211,7 +212,7 @@ export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
         {isLogin && (
           <div className="mt-8 pt-6 border-t-2 border-gray-200">
             <p className="text-center text-gray-700 mb-4">🚀 Acceso Rápido</p>
-            
+
             {/* Admin Access */}
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-[20px] p-4 mb-3 border-2 border-indigo-200">
               <div className="flex items-center gap-3 mb-3">
@@ -223,7 +224,7 @@ export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
                   <p className="text-gray-600">Gestiona toda la plataforma</p>
                 </div>
               </div>
-              
+
               <div className="space-y-2 mb-3">
                 <div className="flex items-center gap-2">
                   <input
@@ -276,7 +277,7 @@ export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
                 <Users className="w-5 h-5 text-blue-600 mx-auto mb-1" />
                 <span className="text-blue-600 block">Trabajador</span>
               </button>
-              
+
               <button
                 onClick={() => {
                   setIsLogin(false);
@@ -287,7 +288,7 @@ export function AuthScreen({ onAuthSuccess, onBack }: AuthScreenProps) {
                 <Briefcase className="w-5 h-5 text-green-600 mx-auto mb-1" />
                 <span className="text-green-600 block">Empresa</span>
               </button>
-              
+
               <button
                 onClick={() => {
                   setIsLogin(false);
