@@ -33,18 +33,18 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
   // Vista de video en reproducción
   if (playingVideo) {
     // Get all free videos from this module
-    const moduleVideos = selectedModule?.videos?.slice(0, 3).map((v: any, idx: number) => ({
+    const moduleVideos = selectedModule?.videos?.slice(0, 3).map((v: any) => ({
       ...v,
       courseName: selectedCourse?.name,
       moduleName: selectedModule?.name,
       isFree: true
     })) || [];
-    
+
     return (
       <ShortsPlayer
         videos={moduleVideos}
         currentIndex={playingVideo.index}
-        onVideoChange={() => {}}
+        onVideoChange={() => { }}
         onClose={() => setPlayingVideo(null)}
         onLoginRequest={onLoginRequest}
       />
@@ -210,7 +210,7 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
 
   // Vista principal según tab
   return (
-    <div className="fixed inset-0 bg-black">
+    <div className="min-h-screen w-full">
       {activeTab === 'profile' ? (
         <div className="flex items-center justify-center h-full bg-gradient-to-b from-indigo-500 to-purple-600">
           <div className="text-center px-6">
@@ -263,8 +263,8 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
                     <div className="h-56 bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 relative overflow-hidden">
                       {course.thumbnailUrl ? (
                         // Mostrar imagen personalizada si existe
-                        <img 
-                          src={course.thumbnailUrl} 
+                        <img
+                          src={course.thumbnailUrl}
                           alt={course.name}
                           className="absolute inset-0 w-full h-full object-cover"
                         />
@@ -276,7 +276,7 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
                             <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
                             <div className="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
                           </div>
-                          
+
                           {/* Icono del curso */}
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8">
@@ -301,7 +301,7 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
                       {/* Módulos del curso */}
                       <div className="space-y-2 mb-4">
                         {course.modules?.slice(0, 3).map((module: any, idx: number) => (
-                          <div 
+                          <div
                             key={module.id}
                             className="flex items-center gap-3 bg-gray-50 rounded-[20px] p-3"
                           >
@@ -319,7 +319,7 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
                             </div>
                           </div>
                         ))}
-                        
+
                         {(course.modules?.length || 0) > 3 && (
                           <p className="text-gray-500 text-sm text-center">
                             +{(course.modules?.length || 0) - 3} módulos más
@@ -364,7 +364,7 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
         // Vista Home - Collect all free videos from all courses (first 3 from each module)
         const allFreeVideos: any[] = [];
         courses.forEach(course => {
-          course.modules?.forEach((module: any, moduleIndex: number) => {
+          course.modules?.forEach((module: any) => {
             const freeVideos = module.videos?.slice(0, 3) || [];
             freeVideos.forEach((video: any) => {
               allFreeVideos.push({
@@ -381,8 +381,8 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
           <ShortsPlayer
             videos={allFreeVideos}
             currentIndex={0}
-            onVideoChange={() => {}}
-            onClose={() => {}}
+            onVideoChange={() => { }}
+            onClose={() => { }}
             onLoginRequest={onLoginRequest}
           />
         ) : (
@@ -393,18 +393,16 @@ export function PublicFeed({ onLoginRequest }: PublicFeedProps) {
       })()}
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 }
 
-function BottomNav({ 
-  activeTab, 
-  onTabChange 
-}: { 
-  activeTab: string; 
+function BottomNav({
+  activeTab,
+  onTabChange
+}: {
+  activeTab: string;
   onTabChange: (tab: 'home' | 'courses' | 'profile') => void;
 }) {
   return (
