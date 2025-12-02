@@ -406,27 +406,27 @@ function BottomNav({
   onTabChange: (tab: 'home' | 'courses' | 'profile') => void;
 }) {
   return (
-    <nav className="fixed bottom-8 left-0 right-0 p-4">
+    <nav className="fixed bottom-8 left-0 right-0 p-4 z-[60]">
       <div className="flex items-center justify-around max-w-md mx-auto">
         <button
           onClick={() => onTabChange('home')}
-          className="flex items-center justify-center transition-all active:scale-95"
+          className="flex items-center justify-center transition-all active:scale-95 w-14 h-14 rounded-full bg-black/40 backdrop-blur-md"
         >
-          <Home className={`w-8 h-8 ${activeTab === 'home' ? 'text-white' : 'text-white/40'}`} />
+          <Home className={`w-6 h-6 ${activeTab === 'home' ? 'text-white' : 'text-white/60'}`} />
         </button>
 
         <button
           onClick={() => onTabChange('courses')}
-          className="flex items-center justify-center transition-all active:scale-95"
+          className="flex items-center justify-center transition-all active:scale-95 w-14 h-14 rounded-full bg-black/40 backdrop-blur-md"
         >
-          <BookOpen className={`w-8 h-8 ${activeTab === 'courses' ? 'text-white' : 'text-white/40'}`} />
+          <BookOpen className={`w-6 h-6 ${activeTab === 'courses' ? 'text-white' : 'text-white/60'}`} />
         </button>
 
         <button
           onClick={() => onTabChange('profile')}
-          className="flex items-center justify-center transition-all active:scale-95"
+          className="flex items-center justify-center transition-all active:scale-95 w-14 h-14 rounded-full bg-black/40 backdrop-blur-md"
         >
-          <User className={`w-8 h-8 ${activeTab === 'profile' ? 'text-white' : 'text-white/40'}`} />
+          <User className={`w-6 h-6 ${activeTab === 'profile' ? 'text-white' : 'text-white/60'}`} />
         </button>
       </div>
     </nav>
